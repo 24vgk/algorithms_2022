@@ -13,3 +13,23 @@
 
 Решите через рекурсию. В задании нельзя применять циклы.
 """
+
+
+def first(n):
+    if n == 1:
+        return n
+    elif n > 0:
+        return n + first(n-1)
+
+
+def second(n):
+    return n * (n + 1) // 2
+
+
+if __name__ == '__main__':
+    nuber_user = int(input('Введите число:'))
+    print(first(nuber_user))
+    if first(nuber_user) == second(nuber_user):
+        print(True)
+    else:
+        print(False)

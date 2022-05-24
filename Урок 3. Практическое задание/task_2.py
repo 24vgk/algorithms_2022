@@ -22,3 +22,61 @@ f1dcaeeafeb855965535d77c55782349444b
 воспользуйтесь базой данный sqlite, postgres и т.д.
 п.с. статья на Хабре - python db-api
 """
+import hashlib
+import sqlite3
+
+
+def hash_password(user_pas, users_name):
+    """Хэшируем  пароль и солим его"""
+    user_pas = bytes(user_pas, encoding='utf-8')
+    salt = bytes(users_name, encoding='utf-8')
+    res = hashlib.sha256(salt + user_pas).hexdigest()
+    return res
+
+
+def sql_add(user_pas, users_name):
+    """Подключаемся к БД и добавляем данные"""
+    try:
+        con = sqlite3.connect('password.sqlite')
+        with con:
+            con.execute("""
+                CREATE TABLE IF NOT EXISTS PASS (
+                    name TEXT UNIQUE,
+                    password TEXT
+                );
+            """)
+        sql = 'INSERT INTO PASS (name, password) values(?, ?)'
+        data = (users_name, hash_password(user_pas, users_name))
+        with con:
+            con.execute(sql, data)
+        with con:
+            data = con.execute("SELECT * FROM PASS")
+            for row in data:
+                print(f'В базе данных хранится строка: {row}, Вы успешно зарегистрировались')
+                return row
+    except sqlite3.IntegrityError:
+        print('Попльзователь с таким логином уже существует, пройдите Авторизацию!')
+
+
+def sql_select(users_name):
+    """Подключаемся к БД и выбираем данные"""
+    con1 = sqlite3.connect('password.sqlite')
+    sql1 = "SELECT password FROM PASS WHERE name = ?"
+    data1 = (users_name,)
+    with con1:
+        result = con1.execute(sql1, data1)
+        for row in result:
+            return row[0]
+
+
+if __name__ == '__main__':
+    user_password = input('Введите пароль: ')
+    user_name = input('Введите логин: ')
+    password_add = sql_add(user_password, user_name)
+    user_name_check = input('Введите логин: ')
+    user_password_check = input('Введите пароль: ')
+    password_check = sql_select(user_name_check)
+    if hash_password(user_password_check, user_name_check) == password_check:
+        print('Вы ввели правильный пароль')
+    else:
+        print('Вы ввели Не правильный пароль')

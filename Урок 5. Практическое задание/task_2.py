@@ -24,3 +24,22 @@ reduce
 __mul__
 __add__
 """
+import collections
+import functools
+
+
+def calculator_16():
+    nums = collections.defaultdict(list)
+    for i in range(1, 3):
+        n = input(f'Введите {i}-е натуральное шестнадцатиричное число: ')
+        nums[n] = list(n)
+    print(nums)
+    sum_res = sum([int(''.join(i), 16) for i in nums.values()])
+    print(sum_res)
+    print("Сумма: ", list('%X' % sum_res))
+    mul_res = functools.reduce(lambda x, y: x * y, [int(''.join(i), 16) for i in nums.values()])
+    print("Произведение: ", list('%X' % mul_res))
+
+
+if __name__ == '__main__':
+    calculator_16()
